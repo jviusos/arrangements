@@ -1,0 +1,67 @@
+# We load the GAP package nq, and define the group *$$m:=\mathds{F}_{13}$$*
+LoadPackage('nq')
+m:=FreeGroup( 13 );
+
+# We define the function which produces the commutation relations from an ordered list of elements  representing each crossing.
+comm:=function(L,f)
+	local l,C,c,i,j;
+	l:=Length(L);
+	C:=[ ];
+	for i in [1..l-1] do
+		c:=Identity(f);
+		for j in [1..l] do
+			c:=c*L[j];
+		od;
+		for j in [i..l+i-1] do
+			c:=c*L[RemInt(2*l-j-1,l)+1]^(-1);
+		od;
+		Append(C,[c]);
+	od;
+	return C;
+end;
+
+# We define a function computing the list of relations taking as input an ordered list of crossings, following Arvola's result and our conventions.
+relations:=function(L,f,L_infinity)
+	local gen, rel, m_in, m_out, r, ind, rloc, l, i, j, conj;
+	gen:=GeneratorsOfGroup(f);
+	rel:=[gen[L_infinity]];
+	m_in:=List(gen,x->x);
+	m_out:=List(gen,x->x);
+	for r in L do
+		ind:=List(r,x->Position(gen,x));
+		rloc:=List(ind,x->m_in[x]);
+		Append(rel,comm(rloc,f));
+		l:=Length(ind);
+		for i in [1..l] do
+			conj:=m_in[ind[i]];
+			for j in [1..i-1] do
+				conj:=m_in[ind[j]]*conj*m_in[ind[j]]^(-1);
+			od;
+			m_out[ind[i]]:=conj;
+		od;
+		m_in:=m_out;
+	od;
+	return rel;
+end;
+
+# List of crossings of *$$\A^+$$*, finite presentation of its fundamental group and computation of the lower central series.
+cross1:=[[m.5,m.10],[m.11,m.8],[m.12,m.8],[m.7,m.8],[m.9,m.3,m.10],[m.9,m.5],[m.9,m.2,m.8],[m.9,m.7],[m.9,m.12],[m.9,m.11],[m.5,m.8],[m.6,m.10],[m.6,m.3,m.8],[m.6,m.5,m.2],[m.6,m.7],[m.6,m.12],[m.6,m.11],[m.1,m.10,m.8],[m.1,m.3],[m.1,m.2],[m.1,m.5,m.7],[m.1,m.12,m.11],[m.5,m.11],[m.5,m.12],[m.3,m.2],[m.3,m.7,m.11],[m.13,m.8],[m.13,m.10],[m.13,m.2,m.11],[m.13,m.7],[m.13,m.3,m.12],[m.13,m.5],[m.10,m.11]];;
+rels1 := relations( cross1, m, 4 );;
+g1 := m / rels1;
+L1 := LowerCentralFactors( g1, 5 );
+
+# For  *$$\gr_i(\A^+)$$*, with *$$i\in\{1,\dots,5\}$$*, we compute: the number of generators, the rank (which is combinatorial) and the number of 2-torsion generators.
+List( [1..5], i -> Length( L1[i] ) );
+List( [1..5], i -> Number( L1[i], x -> x=0 ) );
+List( [1..5], i -> Number( L1[i], x -> x=2 ) );
+
+# List of crossings of *$$\A^-$$*, finite presentation of its fundamental group and computation of the lower central serie.
+cross2:=[[m.11,m.10],[m.5,m.10],[m.5,m.11],[m.7,m.8],[m.9,m.3,m.10],[m.9,m.11],[m.9,m.5],[m.9,m.12],[m.9,m.2,m.8],[m.9,m.7],[m.12,m.8],[m.5,m.8],[m.5,m.12],[m.11,m.8],[m.6,m.10],[m.6,m.3,m.8],[m.6,m.11],[m.6,m.12],[m.6,m.5,m.2],[m.6,m.7],[m.1,m.10,m.8],[m.1,m.3],[m.1,m.11,m.12],[m.1,m.2],[m.1,m.5,m.7],[m.13,m.8],[m.13,m.10],[m.13,m.3,m.12],[m.13,m.11,m.2],[m.13,m.7],[m.13,m.5],[m.3,m.2],[m.3,m.11,m.7]];;
+rels2 := relations( cross2, m,4 );;
+g2 := m / rels2;
+L2 := LowerCentralFactors( g2, 5 );
+
+# For  *$$\gr_i(\A^-)$$*, with *$$i\in\{1,\dots,5\}$$*, we compute: the number of generators, the rank (which is combinatorial) and the number of 2-torsion generators.
+List( [1..5], i -> Length( L2[i] ) );
+List( [1..5], i -> Number( L2[i], x -> x=0 ) );
+List( [1..5], i -> Number( L2[i], x -> x=2 ) );
